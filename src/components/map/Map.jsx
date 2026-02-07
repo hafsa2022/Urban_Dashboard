@@ -3,10 +3,9 @@ import MapContext from "../../hooks/MapContext";
 import { motion } from "framer-motion";
 import Map from "ol/Map";
 import View from "ol/View";
-import TileLayer from "ol/layer/Tile";
+import { fromLonLat } from "ol/proj";
 import OSM from "ol/source/OSM";
-import "ol/ol.css"; // Import OpenLayers CSS
-
+import TileLayer from "ol/layer/Tile";
 
 const MapComponent = ({ children, zoom, center }) => {
   const mapRef = useRef(null);
@@ -16,12 +15,12 @@ const MapComponent = ({ children, zoom, center }) => {
     const mapObj = new Map({
       target: mapRef.current, // Target the div with the ref
       view: new View({
-        center: center, // Center on the prime meridian and equator
+        center: fromLonLat(center), // Center on the prime meridian and equator
         zoom: zoom, // Initial zoom level
       }),
       layers: [
         new TileLayer({
-          source: new OSM(), // Use OpenStreetMap tiles
+          source: new OSM(),
         }),
       ],
       controls: [],
@@ -30,11 +29,15 @@ const MapComponent = ({ children, zoom, center }) => {
     setMap(mapObj);
     //     // Clean up when the component unmounts
     return () => mapObj.setTarget(undefined);
-  }, [center, zoom]); 
+  }, [center, zoom]);
+
 
   return (
-
-    <motion.div ref={mapRef} className="relative w-full h-full" style={{ width: "100%", height: "400px" }}>
+    <motion.div
+      ref={mapRef}
+      className="relative w-full h-full"
+      style={{ width: "100%", height: "600px" }}
+    >
       <MapContext.Provider value={{ map }}>{children}</MapContext.Provider>
     </motion.div>
   );

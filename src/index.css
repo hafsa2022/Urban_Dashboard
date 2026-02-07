@@ -39,26 +39,22 @@
 
     --radius: 0.75rem;
 
-    /* Sidebar */
-    --sidebar-background: 220 20% 10%;
-    --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 185 75% 45%;
-    --sidebar-primary-foreground: 220 20% 8%;
-    --sidebar-accent: 220 15% 15%;
-    --sidebar-accent-foreground: 210 20% 95%;
-    --sidebar-border: 220 15% 18%;
-    --sidebar-ring: 185 75% 45%;
-
-    /* Custom GIS colors */
-    --success: 145 70% 45%;
-    --warning: 38 92% 50%;
-    --info: 200 85% 55%;
+    /* NavBar */
+    --gis-nav: 215 35% 25%;
+    --gis-nav-foreground: 0 0% 100%;
 
     /* Map layer colors */
     --layer-roads: 35 85% 55%;
     --layer-schools: 275 70% 60%;
     --layer-hospitals: 0 75% 55%;
     --layer-parks: 145 70% 45%;
+
+    /* Marker colors */
+    --marker-school: 210 85% 55%;
+    --marker-hospital: 0 72% 51%;
+    --marker-park: 140 60% 45%;
+    --marker-road: 35 90% 55%;
+    --marker-district: 280 60% 55%;
 
     /* Gradients */
     --gradient-primary: linear-gradient(
@@ -92,11 +88,13 @@
     /* Same as root - dark by default */
     --background: 220 20% 8%;
     --foreground: 210 20% 95%;
+    --gis-nav: 215 35% 12%;
+    --gis-nav-foreground: 0 0% 100%;
   }
 }
 
 .glass-card {
-  @apply rounded-xl border;
+  @apply rounded-sm text-white border border-slate-700;
   background: linear-gradient(
     135deg,
     hsl(var(--card) / 0.9),
@@ -107,7 +105,7 @@
 }
 
 .coord-display {
-  @apply font-mono text-xs bg-white/70 dark:bg-gray-800/70 rounded-md p-1;
+  @apply font-mono text-xs dark:bg-gray-800/70 rounded-sm p-1;
 }
 /* Map controls positioning */
 .map-controls-top-right {
@@ -122,6 +120,33 @@
   @apply absolute bottom-4 right-4 z-10;
 }
 
-.rotate-north-button {
-  @apply absolute bottom-6 right-4 z-10;
+.map-controls-top-left {
+  @apply absolute top-4 left-4 z-10;
+}
+
+/* Geocoder control styling */
+.ol-geocoder .gcd-gl-control {
+  @apply rounded-xl border;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--card) / 0.9),
+    hsl(var(--card) / 0.9)
+  );
+  box-shadow: var(--shadow-card);
+  left: calc(var(--spacing) * 2);
+  top: calc(var(--spacing) * -14);
+}
+
+.ol-geocoder .gcd-gl-btn:after {
+  font-size: 20px;
+  content: "\1F50D";
+  background: linear-gradient(
+    135deg,
+    hsl(var(--card) / 0.9),
+    hsl(var(--card) / 0.9)
+  );
+}
+
+.gis-nav {
+  @apply bg-[hsl(var(--gis-nav))] text-[hsl(var(--gis-nav-foreground))];
 }

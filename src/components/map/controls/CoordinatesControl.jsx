@@ -25,6 +25,7 @@ const CoordinatesControl = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="map-controls-bottom-left"
+          style={{ opacity: 1, transform: "none" }}
         >
           <div className="glass-card px-3 py-2">
             <span className="coord-display">

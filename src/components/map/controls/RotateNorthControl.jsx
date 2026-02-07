@@ -1,13 +1,10 @@
-// RotateNorthControl.js
-import React, { useContext, useEffect, useRef } from "react";
-import Control from "ol/control/Control";
+import { useContext, useEffect, useRef } from "react";
 import MapContext from "../../../hooks/MapContext";
 import { motion } from "framer-motion";
 
 const RotateNorthControl = () => {
   const { map } = useContext(MapContext);
   const mapInstanceRef = useRef(null);
-  //   const controlRef = useRef(null);
 
   useEffect(() => {
     if (!map) return;
