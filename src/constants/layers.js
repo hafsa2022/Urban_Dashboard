@@ -1,27 +1,3 @@
-// // components/map/Layers.js
-// import TileLayer from "ol/layer/Tile";
-// import OSM from "ol/source/OSM";
-// import XYZ from "ol/source/XYZ";
-
-// const osmLayer = new TileLayer({
-//   title: "Roads",
-//   visible: true,
-//   source: new OSM(),
-// });
-
-// const satelliteLayer = new TileLayer({
-//   title: "Satellite",
-//   visible: false,
-//   source: new XYZ({
-//     url: "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}",
-//   }),
-// });
-
-// export{
-//     osmLayer, 
-//     satelliteLayer
-// }
-
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
@@ -56,19 +32,20 @@ export const loadFacilitiesLayer = async (type, icon) => {
   const layer = new VectorLayer({
     source: new VectorSource({
       features: new GeoJSON().readFeatures(geojson, {
-        featureProjection: "EPSG:4326",
+        dataProjection: "EPSG:4326",
+        featureProjection: "EPSG:3857",
       }),
     }),
     visible: true,
     style: new Style({
       image: new Icon({
         src: icon || "/marker.png",
-        scale: 0.06,
+        scale: 0.08,
       }),
     }),
   });
 
-  layer.set("title", type); // ⭐ IMPORTANT POUR SWITCHER
+  layer.set("title", type);
 
   return layer;
 };

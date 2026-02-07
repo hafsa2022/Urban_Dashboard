@@ -1,63 +1,48 @@
-// // components/map/LayerSwitcherControl.jsx
-// import { useContext } from "react";
-// import MapContext from "../../../hooks/MapContext";
+import { Label } from "../../ui/label";
+import { Checkbox } from "../../ui/checkbox";
+import {
+  Route,
+  MapPin,
+  GraduationCap,
+  Building2,
+  TreePine,
+} from "lucide-react";
 
-// const LayerSwitcherControl = () => {
-//   const { map } = useContext(MapContext);
+const getLayerIcon = (name) => {
+  switch (name) {
+    case "road":
+      return <Route className="h-4 w-4" />;
+    case "district":
+      return <MapPin className="h-4 w-4" />;
+    case "school":
+      return <GraduationCap className="h-4 w-4" />;
+    case "hospital":
+      return <Building2 className="h-4 w-4" />;
+    case "park":
+      return <TreePine className="h-4 w-4" />;
+    default:
+      return <MapPin className="h-4 w-4" />;
+  }
+};
 
-//   const toggleLayer = (index) => {
-//     map.getLayers().forEach((layer, i) => {
-//       layer.setVisible(i === index);
-//     });
-//   };
+const getLayerColor = (name) => {
+  switch (name) {
+    case "road":
+      return { backgroundColor: "#3b82f6", borderColor: "#3b82f6" }; // Blue
+    case "district":
+      return { backgroundColor: "#f59e0b", borderColor: "#f59e0b" }; // Amber
+    case "school":
+      return { backgroundColor: "#ef4444", borderColor: "#ef4444" }; // Red
+    case "hospital":
+      return { backgroundColor: "#3b82f6", borderColor: "#3b82f6" }; // Blue
 
+    case "park":
+      return { backgroundColor: "#22c55e", borderColor: "#22c55e" }; // Green
+    default:
+      return { backgroundColor: "#6b7280", borderColor: "#6b7280" }; // Gray
+  }
+};
 
-
-//   return (
-//     <div className="absolute top-4 left-4 bg-white rounded-sm shadow-lg p-4 w-48 z-50">
-//       <h3 className="font-semibold mb-2">Layers</h3>
-//       <hr className="mb-2" />
-
-//       <label className="flex gap-2">
-//         <input type="checkbox" name="layer" onChange={() => toggleLayer(0)} defaultChecked />
-//         OSM
-//       </label>
-
-//       <label className="flex gap-2">
-//         <input type="checkbox" name="layer" onChange={() => toggleLayer(1)} />
-//         Satellite
-//       </label>
-//     </div>
-//   );
-// };
-
-// export default LayerSwitcherControl;
-
-// export default function LayerSwitcher({ layers }) {
-//   const toggle = (key) => {
-//     const layer = layers[key];
-//     layer.setVisible(!layer.getVisible());
-//   };
-
-//   return (
-//     <div className="absolute z-50 top-4 left-4 bg-white p-3 rounded-sm shadow">
-//       <h4 className="font-bold mb-2" >Layers</h4>
-//       <hr className="mb-2" />
-
-//       {Object.keys(layers).map((key) => (
-//         <label key={key} className="flex gap-2 text-sm">
-//           <input
-//             type="checkbox"
-//             defaultChecked={layers[key].getVisible()}
-//             onChange={() => toggle(key)}
-//           />
-//           {key}
-//         </label>
-//       ))}
-//     </div>
-//   );
-// }
-import React from "react";
 export default function LayerSwitcherControl({ layers }) {
   if (!layers || Object.keys(layers).length === 0) return null;
 
@@ -68,18 +53,31 @@ export default function LayerSwitcherControl({ layers }) {
 
   return (
     <div className="absolute z-50 top-4 left-4 bg-white p-3 rounded shadow">
-      <h4 className="font-bold mb-2">Layers</h4>
-
-      {Object.entries(layers).map(([key, layer]) => (
-        <label key={key} className="flex gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={layer.getVisible()}
-            onChange={() => toggle(key)}
-          />
-          {key}
-        </label>
-      ))}
+      <div className="p-4 w-56 animate-slide-in-left">
+        <h3 className="font-semibold text-lg mb-4 text-foreground">Layers</h3>
+        <div className="space-y-3">
+          {Object.entries(layers).map(([key, layer]) => (
+            <label
+              key={key}
+              className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
+            >
+              <Checkbox
+                checked={layer.getVisible()}
+                onCheckedChange={() => toggle(key)}
+                className="border-2"
+                style={{
+                  borderColor: getLayerColor(key).borderColor,
+                  backgroundColor: getLayerColor(key).backgroundColor,
+                }}
+              />
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                {getLayerIcon(key)}
+                {key.charAt(0).toUpperCase() + key.slice(1) + "s"}
+              </span>
+            </label>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
