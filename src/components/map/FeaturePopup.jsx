@@ -43,6 +43,7 @@ export default function FeaturePopup({ feature, onClose, onViewDetails }) {
   if (!feature) return null;
 
   const properties = feature.getProperties();
+  console.log("Feature properties:", properties);
   const rating = properties.rating || 0;
 
   return (
@@ -51,7 +52,7 @@ export default function FeaturePopup({ feature, onClose, onViewDetails }) {
         <div className="flex items-center gap-2">
           {getTypeIcon(properties.type)}
           <h3 className="font-bold text-gray-900 text-lg">
-            {properties.name || "Feature"}
+            {properties.name || properties.nom_region || "Unknown Feature"}
           </h3>
         </div>
         <button

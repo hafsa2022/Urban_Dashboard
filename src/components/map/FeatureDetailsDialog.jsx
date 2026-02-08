@@ -79,7 +79,7 @@ export default function FeatureDetailsDialog({ feature, onClose }) {
         <div className="sticky top-0 bg-linear-to-r from-[#293c56] to-[#1f2f44] px-6 py-6 flex justify-between items-start">
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-white mb-2">
-              {properties.name || "Unknown"}
+              {properties.name || properties.nom_region || "Unknown Feature"}
             </h2>
             <div className="flex items-center gap-4">
               {/* <span className="inline-block px-3 py-1 bg-white bg-opacity-20 text-white text-sm font-semibold rounded-full capitalize">

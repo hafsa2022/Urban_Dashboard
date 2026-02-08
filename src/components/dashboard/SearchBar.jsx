@@ -176,7 +176,7 @@
 import React, { useState } from "react";
 import { Search, X } from "lucide-react";
 
-const SearchBar = ({ onSearch, resultCount }) => {
+const SearchBar = ({ onSearch }) => {
   const [searchInput, setSearchInput] = useState("");
 
   const handleSearchChange = (e) => {

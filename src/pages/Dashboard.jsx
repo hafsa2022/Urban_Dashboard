@@ -12,25 +12,26 @@ import SearchBar from "../components/dashboard/SearchBar";
 import NavBar from "../components/NavBar";
 import { useAuth } from "../hooks/useAuth";
 import { loadFacilitiesLayer } from "../constants/layers";
-import { Style, Icon } from "ol/style";
-
+import { loadRegionsLayer } from "../constants/loadRegionsLayer";
+import { Style, Icon, Fill, Stroke, Text } from "ol/style";
 
 function MapContentLoader() {
   const { map } = useContext(MapContext);
   const [layers, setLayers] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [layerStyles, setLayerStyles] = useState({});
-  const [resultCount, setResultCount] = useState(0);
 
   useEffect(() => {
     if (!map) return;
-   
+
     Promise.all([
       loadFacilitiesLayer("school", "icons/school-marker.png"),
       loadFacilitiesLayer("hospital", "icons/hospital-marker.png"),
       loadFacilitiesLayer("park", "icons/park-marker.png"),
-    ]).then(([schools, hospitals, parks]) => {
-      console.log("Layers loaded:", { schools, hospitals, parks });
+      loadRegionsLayer(),
+    ]).then(([schools, hospitals, parks, regionsLayer]) => {
+      // console.log("Layers loaded:", { schools, hospitals, parks });
+      map.addLayer(regionsLayer);
       map.addLayer(schools);
       map.addLayer(hospitals);
       map.addLayer(parks);
@@ -46,6 +47,11 @@ function MapContentLoader() {
       if (parks) {
         styles.park = parks.getStyle();
       }
+      if (regionsLayer) {
+        styles.regions = regionsLayer.getStyle();
+      } else {
+        console.warn("Regions layer not loaded, cannot store original style.");
+      }
       setLayerStyles(styles);
 
       setLayers((prevLayers) => ({
@@ -53,6 +59,7 @@ function MapContentLoader() {
         school: schools,
         hospital: hospitals,
         park: parks,
+        regions: regionsLayer,
       }));
     });
   }, [map]);
@@ -62,23 +69,33 @@ function MapContentLoader() {
     if (!map || Object.keys(layers).length === 0) return;
 
     if (searchQuery.trim() === "") {
-      setResultCount(0);
       // Show all features - set style function to return original style
       Object.entries(layers).forEach(([type, layer]) => {
         if (layer) {
-          layer.setStyle((feature) => {
-            return new Style({
-              image: new Icon({
-                src: `/icons/${type}-marker.png`,
-                scale: 0.08,
-              }),
+          // Restore original style for this layer if we saved it
+          const originalStyle = layerStyles[type];
+          if (originalStyle) {
+            // If originalStyle is a function (style function), set it directly
+            layer.setStyle(
+              typeof originalStyle === "function"
+                ? originalStyle
+                : () => originalStyle,
+            );
+          } else {
+            // Fallback for point layers: use marker icon
+            layer.setStyle((feature) => {
+              return new Style({
+                image: new Icon({
+                  src: `/icons/${type}-marker.png`,
+                  scale: 0.08,
+                }),
+              });
             });
-          });
+          }
         }
       });
     } else {
       const lowerQuery = searchQuery.toLowerCase();
-      let matchCount = 0;
 
       // Filter features and apply styles conditionally
       Object.entries(layers).forEach(([type, layer]) => {
@@ -86,35 +103,58 @@ function MapContentLoader() {
           layer.setStyle((feature) => {
             // Try to get name from multiple possible locations
             const properties = feature.getProperties();
-            const featureName = (
-              properties?.name || 
-              properties?.title || 
-              properties?.Name ||
-              ""
-            )?.toString().toLowerCase().trim() || "";
+            const featureName =
+              (properties?.name || properties?.title || properties?.Name || "")
+                ?.toString()
+                .toLowerCase()
+                .trim() || "";
 
-            console.log("Feature name:", featureName, "Query:", lowerQuery, "Match:", featureName.includes(lowerQuery));
+            console.log(
+              "Feature name:",
+              featureName,
+              "Query:",
+              lowerQuery,
+              "Match:",
+              featureName.includes(lowerQuery),
+            );
 
             if (featureName.includes(lowerQuery)) {
-              matchCount++;
-              // Show matching features
+              // For region polygons, return the original region style (fill/stroke/text)
+              if (type === "regions") {
+                const original = layerStyles.regions;
+                if (original) {
+                  return typeof original === "function"
+                    ? original(feature)
+                    : original;
+                }
+                // fallback polygon style
+                return new Style({
+                  fill: new Fill({ color: "rgba(0, 123, 255, 0.35)" }),
+                  stroke: new Stroke({ color: "#1e3799", width: 1.5 }),
+                  text: new Text({
+                    text: feature.get("nom_region"),
+                    fill: new Fill({ color: "#000" }),
+                    stroke: new Stroke({ color: "#fff", width: 3 }),
+                  }),
+                });
+              }
+
+              // Show matching point features using their marker icon
               return new Style({
                 image: new Icon({
                   src: `/icons/${type}-marker.png`,
                   scale: 0.08,
                 }),
               });
-            } else {
-              // Hide non-matching features by returning null style
-              return null;
             }
+
+            // Hide non-matching features by returning null style
+            return null;
           });
         }
       });
-      
-      setResultCount(matchCount);
     }
-  }, [searchQuery, layers, map]);
+  }, [searchQuery, layers, map, layerStyles]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
@@ -122,7 +162,7 @@ function MapContentLoader() {
 
   return (
     <>
-      <SearchBar onSearch={handleSearch} resultCount={resultCount} />
+      <SearchBar onSearch={handleSearch} />
       <MapInteraction />
       <RotateNorthControl />
       <CoordinatesControl />
