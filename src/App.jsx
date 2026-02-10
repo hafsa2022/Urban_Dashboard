@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Profile from "./pages/Profile";
 import { Loader2 } from "lucide-react";
 import "ol/ol.css";
 import "ol-layerswitcher/dist/ol-layerswitcher.css";
@@ -33,6 +34,14 @@ function App() {
                   >
                     <LazyLoadedDashboard />
                   </React.Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               }
             />

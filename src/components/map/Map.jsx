@@ -36,7 +36,7 @@ const MapComponent = ({ children, zoom, center }) => {
     <motion.div
       ref={mapRef}
       className="relative w-full h-full"
-      style={{ width: "100%", height: "600px" }}
+      style={{ width: "100%", height: "550px" }}
     >
       <MapContext.Provider value={{ map }}>{children}</MapContext.Provider>
     </motion.div>

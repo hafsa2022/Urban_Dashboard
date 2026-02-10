@@ -5,7 +5,7 @@ import { Map, Eye, EyeOff, Loader2, MapPin } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { z } from "zod";
+import { json, z } from "zod";
 import { supabase } from "../utils/supabase";
 import { toast } from "sonner";
 
@@ -18,8 +18,10 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
@@ -52,7 +54,12 @@ const Auth = () => {
 
     const passwordResult = passwordSchema.safeParse(password);
     if (!passwordResult.success) {
-      newErrors.password = passwordResult.error.errors[0].message;
+      const errorMessage = JSON.parse(passwordResult.error.message);
+      newErrors.password = errorMessage[0].message;
+    }
+
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -65,7 +72,7 @@ const Auth = () => {
     if (!validateForm()) return;
 
     setLoading(true);
-
+    console.log("Attempting to authenticate user:", { email, isLogin });
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
@@ -75,34 +82,13 @@ const Auth = () => {
 
         if (error) {
           if (error.message.includes("Invalid login credentials")) {
-            // console.log("Invalid email or password. Please try again.");
-            // toast({
-            //   variant: 'destructive',
-            //   title: 'Login Failed',
-            //   description: 'Invalid email or password. Please try again.',
-            // });
             toast.error("Invalid email or password. Please try again.");
           } else if (error.message.includes("Email not confirmed")) {
-            toast.success("Email not verified. Please check your email for the verification link.");
-            // console.log(
-            //   "Email not verified. Please check your email for the verification link.",
-            // );
-            // toast({
-            //   variant: 'destructive',
-            //   title: 'Email Not Verified',
-            //   description: 'Please check your email and verify your account.',
-            // });
+            toast.success(
+              "Email not verified. Please check your email for the verification link.",
+            );
           } else {
             toast.error("An error occurred during login. Please try again.");
-            // console.log(
-            //   "An error occurred during login. Please try again.",
-            //   error.message,
-            // );
-            // toast({
-            //   variant: 'destructive',
-            //   title: 'Error',
-            //   description: error.message,
-            // });
           }
         }
       } else {
@@ -121,36 +107,16 @@ const Auth = () => {
 
         if (error) {
           if (error.message.includes("already registered")) {
-            toast.error("This email is already registered. Please login instead.");
-            // console.log(
-            //   "This email is already registered. Please login instead.",
-            // );
-            // toast({
-            //   variant: 'destructive',
-            //   title: 'Account Exists',
-            //   description: 'This email is already registered. Please login instead.',
-            // });
+            toast.error(
+              "This email is already registered. Please login instead.",
+            );
           } else {
             toast.error("An error occurred during sign up. Please try again.");
-            // console.log(
-            //   "An error occurred during sign up. Please try again.",
-            //   error.message,
-            // );
-            // toast({
-            //   variant: 'destructive',
-            //   title: 'Error',
-            //   description: error.message,
-            // });
           }
         } else {
-          toast.success("Sign-up successful! Please check your email to verify your account.");
-          // console.log(
-          //   "Sign-up successful! Please check your email to verify your account.",
-          // );
-          //   toast({
-          //     title: 'Check your email',
-          //     description: 'We sent you a verification link to complete your registration.',
-          //   });
+          toast.success(
+            "Sign-up successful! Please check your email to verify your account.",
+          );
         }
       }
     } catch (error) {
@@ -261,7 +227,6 @@ const Auth = () => {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
-                
                   id="email"
                   type="email"
                   value={email}
@@ -307,6 +272,46 @@ const Auth = () => {
                   <p className="text-sm text-destructive">{errors.password}</p>
                 )}
               </div>
+
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        setErrors((prev) => ({
+                          ...prev,
+                          confirmPassword: undefined,
+                        }));
+                      }}
+                      placeholder="••••••••"
+                      className={`bg-muted/50 border-border/50 pr-10 ${errors.confirmPassword ? "border-destructive" : ""}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="text-sm text-destructive">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <Button
                 type="submit"
