@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { Users, GraduationCap, Building2, TreePine } from "lucide-react";
+import { Users, GraduationCap, Building2, TreePine, Hotel } from "lucide-react";
 import { supabase } from "../../utils/supabase";
 
 export default function KpiCards({ filters }) {
+  console.log("KpiCards filters:", filters);
   const [counts, setCounts] = useState({
     schools: 0,
     hospitals: 0,
     parks: 0,
+    hotels: 0,
     population: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -26,10 +28,9 @@ export default function KpiCards({ filters }) {
               .select("id", { count: "exact", head: true })
               .eq("type", facilityType);
 
-            // If region is selected, filter by region name
+            // If region is selected, filter by region_id
             if (region) {
-              // query = query.eq("region", region);
-              query = query.filter("properties->>region", "eq", region);
+              query = query.eq("region_id", region);
             }
 
             const { count, error } = await query;
@@ -44,35 +45,37 @@ export default function KpiCards({ filters }) {
           }
         };
 
-        const [sCount, hCount, pCount] = await Promise.all([
+        const [sCount, hCount, pCount, hotelCount] = await Promise.all([
           getCount("school"),
           getCount("hospital"),
           getCount("park"),
+          getCount("hotel"),
         ]);
 
         // Fetch population from regions
-        let population = 0;
-        if (region) {
-          const { data } = await supabase
-            .from("regions")
-            .select("population")
-            .eq("nom_region", region)
-            .single();
-          population = data?.population || 0;
-        } else {
-          const { data: regions } = await supabase
-            .from("regions")
-            .select("population");
-          if (regions && Array.isArray(regions)) {
-            population = regions.reduce((acc, r) => acc + (r.population || 0), 0);
-          }
-        }
+        // let population = 0;
+        // if (region) {
+        //   const { data } = await supabase
+        //     .from("regions")
+        //     .select("population")
+        //     .eq("nom_region", region)
+        //     .single();
+        //   population = data?.population || 0;
+        // } else {
+        //   const { data: regions } = await supabase
+        //     .from("regions")
+        //     .select("population");
+        //   if (regions && Array.isArray(regions)) {
+        //     population = regions.reduce((acc, r) => acc + (r.population || 0), 0);
+        //   }
+        // }
 
         setCounts({
           schools: sCount,
           hospitals: hCount,
           parks: pCount,
-          population,
+          hotels: hotelCount,
+          // population,
         });
       } catch (error) {
         console.error("Error loading KPI data:", error);
@@ -85,14 +88,14 @@ export default function KpiCards({ filters }) {
   }, [filters]);
 
   const kpiData = [
-    {
-      label: "Population",
-      value: counts.population.toLocaleString(),
-      icon: Users,
-      color: "from-purple-500 to-purple-600",
-      lightColor: "bg-purple-50",
-      textColor: "text-purple-700",
-    },
+    // {
+    //   label: "Population",
+    //   value: counts.population.toLocaleString(),
+    //   icon: Users,
+    //   color: "from-purple-500 to-purple-600",
+    //   lightColor: "bg-purple-50",
+    //   textColor: "text-purple-700",
+    // },
     {
       label: "Schools",
       value: counts.schools,
@@ -108,6 +111,14 @@ export default function KpiCards({ filters }) {
       color: "from-blue-500 to-blue-600",
       lightColor: "bg-blue-50",
       textColor: "text-blue-700",
+    },
+    {
+      label: "Hotels",
+      value: counts.hotels,
+      icon: Hotel,
+      color: "from-yellow-500 to-yellow-600",
+      lightColor: "bg-yellow-50",
+      textColor: "text-yellow-700",
     },
     {
       label: "Parks",

@@ -13,10 +13,7 @@ export const loadRegionsLayer = async () => {
       code_region,
       nom_region,
       nom_arabe,
-      marocains,
-      etrangers,
-      population,
-      menages
+      population
     `);
 
   if (error) {
@@ -59,10 +56,7 @@ export const loadRegionsLayer = async () => {
         code_region: row.code_region,
         nom_region: row.nom_region,
         nom_arabe: row.nom_arabe,
-        marocains: row.marocains,
-        etrangers: row.etrangers,
         population: row.population,
-        menages: row.menages,
       });
 
       return feature;

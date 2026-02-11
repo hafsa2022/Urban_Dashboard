@@ -121,21 +121,25 @@ export default function FeatureDetailsDialog({ feature, onClose }) {
                 Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredProperties.map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="bg-linear-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200"
-                  >
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">
-                      {key.replace(/_/g, " ")}
-                    </p>
-                    <p className="text-base font-semibold text-gray-900 wrap-break-word">
-                      {typeof value === "object"
-                        ? JSON.stringify(value)
-                        : String(value)}
-                    </p>
-                  </div>
-                ))}
+                {filteredProperties.map(([key, value]) => {
+                  if (key.toLowerCase().includes("area")) return null;
+                  return (
+                    <div
+                      key={key}
+                      className="bg-linear-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200"
+                    >
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">
+                        {key.replace(/_/g, " ")}
+                      </p>
+                      <p className="text-base font-semibold text-gray-900 wrap-break-word">
+                        {typeof value === "object"
+                          ? JSON.stringify(value)
+                          : String(value)}
+                      </p>
+                    </div>
+                  );
+                })}
+                {/* ))} */}
               </div>
             </div>
           )}

@@ -26,13 +26,16 @@ function MapContentLoader({ filters }) {
       loadFacilitiesLayer("school", "icons/school-marker.png"),
       loadFacilitiesLayer("hospital", "icons/hospital-marker.png"),
       loadFacilitiesLayer("park", "icons/park-marker.png"),
+      loadFacilitiesLayer("hotel", "icons/hotel-marker.png"),
+      // loadFacilitiesLayer("sport-center", "icons/sportCenter-marker.png"),
       loadRegionsLayer(),
-    ]).then(([schools, hospitals, parks, regionsLayer]) => {
+    ]).then(([schools, hospitals, parks, hotels, regionsLayer]) => {
       // console.log("Layers loaded:", { schools, hospitals, parks });
       map.addLayer(regionsLayer);
       map.addLayer(schools);
       map.addLayer(hospitals);
       map.addLayer(parks);
+      map.addLayer(hotels);
 
       // Store original styles for each layer type
       const styles = {};
@@ -41,6 +44,9 @@ function MapContentLoader({ filters }) {
       }
       if (hospitals) {
         styles.hospital = hospitals.getStyle();
+      }
+      if (hotels) {
+        styles.hotel = hotels.getStyle();
       }
       if (parks) {
         styles.park = parks.getStyle();
@@ -56,6 +62,7 @@ function MapContentLoader({ filters }) {
         ...prevLayers,
         school: schools,
         hospital: hospitals,
+        hotel: hotels,
         park: parks,
         regions: regionsLayer,
       }));
@@ -161,11 +168,13 @@ function MapContentLoader({ filters }) {
     const { equipment = {}, region = null, regionGeom = null } = filters;
     const shouldShowSchools = equipment.school !== false;
     const shouldShowHospitals = equipment.hospital !== false;
+    const shouldShowHotels = equipment.hotel !== false;
     const shouldShowParks = equipment.park !== false;
 
     // Handle equipment visibility
     if (layers.school) layers.school.setVisible(shouldShowSchools);
     if (layers.hospital) layers.hospital.setVisible(shouldShowHospitals);
+    if (layers.hotel) layers.hotel.setVisible(shouldShowHotels);
     if (layers.park) layers.park.setVisible(shouldShowParks);
 
     // If region is selected, filter facilities to only show those in the region
@@ -178,12 +187,14 @@ function MapContentLoader({ filters }) {
         });
         const regionGeometry = regionFeature.getGeometry();
 
-        // Apply filtering to each facility layer
-        [
-          { layer: layers.school },
-          { layer: layers.hospital },
-          { layer: layers.park },
-        ].forEach(({ layer }) => {
+        // Only filter visible layers based on equipment settings
+        const layersToFilter = [];
+        if (shouldShowSchools) layersToFilter.push({ type: "school", layer: layers.school });
+        if (shouldShowHospitals) layersToFilter.push({ type: "hospital", layer: layers.hospital });
+        if (shouldShowParks) layersToFilter.push({ type: "park", layer: layers.park });
+        if (shouldShowHotels) layersToFilter.push({ type: "hotel", layer: layers.hotel });
+
+        layersToFilter.forEach(({ type, layer }) => {
           if (!layer) return;
 
           // Get all features from the source
@@ -193,19 +204,24 @@ function MapContentLoader({ filters }) {
           // Filter features that are within the region
           const filteredFeatures = allFeatures.filter((feature) => {
             const featureGeom = feature.getGeometry();
-            return featureGeom && regionGeometry.intersectsExtent(featureGeom.getExtent());
+            return (
+              featureGeom &&
+              regionGeometry.intersectsExtent(featureGeom.getExtent())
+            );
           });
 
           // Create a new source with only filtered features
-          const newSource = new (source.constructor)({
-            features: filteredFeatures,
+          const newSource = new VectorSource({
+            features: filteredFeatures.slice(),
           });
 
           // Preserve the style
           const style = layer.getStyle();
-          newSource.on("addfeature", () => {
-            if (style) layer.setStyle(style);
-          });
+          if (style) {
+            newSource.on("addfeature", () => {
+              layer.setStyle(style);
+            });
+          }
 
           layer.setSource(newSource);
         });
@@ -213,59 +229,68 @@ function MapContentLoader({ filters }) {
         console.warn("Could not filter facilities by region:", err);
       }
     } else {
-      // If no region selected, reload all facilities
-      if (layers.school && shouldShowSchools) {
-        loadFacilitiesLayer("school", "icons/school-marker.png").then((layer) => {
+      // If no region selected, reload all facilities based on equipment visibility
+      const layersToReload = [];
+      if (shouldShowSchools) layersToReload.push({ type: "school", icon: "icons/school-marker.png" });
+      if (shouldShowHospitals) layersToReload.push({ type: "hospital", icon: "icons/hospital-marker.png" });
+      if (shouldShowParks) layersToReload.push({ type: "park", icon: "icons/park-marker.png" });
+      if (shouldShowHotels) layersToReload.push({ type: "hotel", icon: "icons/hotel-marker.png" });
+
+      layersToReload.forEach(({ type, icon }) => {
+        if (!layers[type]) return;
+        
+        loadFacilitiesLayer(type, icon).then((layer) => {
           if (layer) {
-            layer.setStyle(layerStyles.school);
-            layers.school.setSource(layer.getSource());
+            layer.setStyle(layerStyles[type]);
+            layers[type].setSource(layer.getSource());
           }
         });
-      }
-      if (layers.hospital && shouldShowHospitals) {
-        loadFacilitiesLayer("hospital", "icons/hospital-marker.png").then((layer) => {
-          if (layer) {
-            layer.setStyle(layerStyles.hospital);
-            layers.hospital.setSource(layer.getSource());
-          }
-        });
-      }
-      if (layers.park && shouldShowParks) {
-        loadFacilitiesLayer("park", "icons/park-marker.png").then((layer) => {
-          if (layer) {
-            layer.setStyle(layerStyles.park);
-            layers.park.setSource(layer.getSource());
-          }
-        });
-      }
+      });
+
+      // Hide layers not in equipment filter
+      if (layers.school && !shouldShowSchools) layers.school.setVisible(false);
+      if (layers.hospital && !shouldShowHospitals) layers.hospital.setVisible(false);
+      if (layers.park && !shouldShowParks) layers.park.setVisible(false);
+      if (layers.hotel && !shouldShowHotels) layers.hotel.setVisible(false);
     }
+  }, [filters, layers, map, layerStyles]);
+
+  // Highlight selected region and zoom
+  useEffect(() => {
+    if (!map || Object.keys(layers).length === 0) return;
+
+    const { region = null, regionGeom = null, regionName = null } = filters;
 
     // Highlight selected region
     if (layers.regions) {
       layers.regions.setStyle((feature) => {
-        const regionName = feature.get("nom_region");
-        const isSelected = regionName === region;
+        const featureRegionName = feature.get("nom_region");
+        const isSelected = featureRegionName === regionName;
 
         if (isSelected) {
           return new Style({
             fill: new Fill({
               color: getRegionColor(feature.get("code_region")),
+              opacity: 1,
             }),
             stroke: new Stroke({ color: "#000", width: 3 }),
             text: new Text({
-              text: regionName,
+              text: featureRegionName,
               fill: new Fill({ color: "#000" }),
               stroke: new Stroke({ color: "#fff", width: 3 }),
             }),
           });
         }
 
+        // Semi-transparent for non-selected regions
         return new Style({
-          fill: new Fill({ color: "transparent" }),
-          // fill: new Fill({ color: getRegionColor(feature.get("code_region")) }),
+          fill: new Fill({
+            color: getRegionColor(feature.get("code_region")),
+            opacity: 0.2,
+          }),
           stroke: new Stroke({ color: "#1e3799", width: 1.5 }),
           text: new Text({
-            text: regionName,
+            text: featureRegionName,
             fill: new Fill({ color: "#000" }),
             stroke: new Stroke({ color: "#fff", width: 3 }),
           }),
@@ -287,7 +312,7 @@ function MapContentLoader({ filters }) {
         console.warn("Could not zoom to region:", err);
       }
     }
-  }, [filters, layers, map, layerStyles]);
+  }, [filters, layers, map]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);

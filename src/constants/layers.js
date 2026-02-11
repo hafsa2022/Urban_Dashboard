@@ -15,18 +15,35 @@ export const loadFacilitiesLayer = async (type, icon) => {
     return null;
   }
 
+  // Ensure proper GeoJSON format
   const geojson = {
     type: "FeatureCollection",
-    features: data.map((f) => ({
-      type: "Feature",
-      geometry: f.geom,
-      properties: {
-        id: f.id,
-        name: f.name,
-        type: f.type,
-        ...f.properties,
-      },
-    })),
+    features: data.map((f) => {
+      // Handle geom - it could be a GeoJSON object or a string
+      let geometry = null;
+      try {
+        if (typeof f.geom === 'string') {
+          geometry = JSON.parse(f.geom);
+        } else {
+          geometry = f.geom;
+        }
+      } catch (e) {
+        console.error(`Failed to parse geometry for facility ${f.id}:`, e);
+        return null;
+      }
+
+      return {
+        type: "Feature",
+        geometry: geometry,
+        properties: {
+          id: f.id,
+          name: f.name,
+          type: f.type,
+          region_id: f.region_id,
+          ...f.properties,
+        },
+      };
+    }).filter(Boolean), // Remove any null features
   };
 
   const layer = new VectorLayer({
