@@ -165,7 +165,6 @@ const Auth = () => {
               "Interactive OpenStreetMap visualization",
               "Real-time spatial queries with PostGIS",
               "Layer management and attribute filtering",
-              "Distance-based analysis and buffers",
             ].map((feature, index) => (
               <motion.div
                 key={index}
