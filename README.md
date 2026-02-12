@@ -1,3 +1,4 @@
+![alt text](image.png)
 # 🌍 Urban Dashboard
 
 A modern, interactive geographic information system (GIS) application for visualizing and analyzing urban facilities across regions. Built with React, OpenStreetMap, and PostGIS spatial database, Urban Dashboard provides real-time statistics, advanced filtering, and an intuitive interface for exploring urban infrastructure.
@@ -52,12 +53,6 @@ cd Urban_Dashboard
 2. **Install client dependencies**
 ```bash
 cd client
-npm install
-```
-
-3. **Install server dependencies** (if using backend)
-```bash
-cd ../server
 npm install
 ```
 
@@ -198,7 +193,6 @@ facilities_geojson (view/table)
 ├── geom (geometry(Point, 4326))
 ├── region_id (integer) - Foreign key to regions
 ├── properties (jsonb)
-└── area (double precision)
 ```
 
 ### Regions Table
@@ -208,6 +202,7 @@ regions
 ├── nom_region (text) - Region name
 ├── code_region (text)
 ├── geom (geometry(Polygon, 4326))
+├── populations (Double Precision)
 └── [other geographic properties]
 ```
 
