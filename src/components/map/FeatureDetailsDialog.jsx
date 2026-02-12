@@ -73,7 +73,7 @@ export default function FeatureDetailsDialog({ feature, onClose }) {
   );
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 shadow-lg">
       <div className="bg-white rounded-sm shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-linear-to-r from-[#293c56] to-[#1f2f44] px-6 py-6 flex justify-between items-start">

@@ -56,7 +56,7 @@ export default function LayerSwitcherControl({ layers }) {
   };
 
   return (
-    <div className="absolute z-50 top-4 left-4 bg-white p-4 rounded-sm shadow-lg w-50">
+    <div className="absolute z-10 top-4 left-4 bg-white p-2 rounded-sm shadow-lg w-50">
       <h3 className="font-semibold text-lg mb-2">Layers</h3>
 
       <div className="space-y-2">
