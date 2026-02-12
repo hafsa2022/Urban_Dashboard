@@ -162,55 +162,57 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 npm run dev
 
 📊 Project Architecture
-src/
- ├── components/
- │   └── dashboard/
- │       ├── FilterSideBar
- │       ├── KpiCards
- │       ├── SearchBar
- │       ├── StatsCharts
- │   └── map
- │       └── controls
- │           ├── CoordinatesControl
- │           ├── LayerSwitcherControl
- │           ├── RotateNorthControl
- │           └── ZoomControl
- │       ├── FeatureDetailsDialog
- │       ├── FeaturePopup
- │       ├── Map
- │       ├── MapContentLoader
- │       ├── MapInteraction
- │    └── ui
- │        ├── button
- │        ├── card
- │        ├── checkbox
- │        ├── dropdown-menu
- │        ├── input
- │        └── label
- │   ├── NavBar
- │   ├── ProtectedRoute
- │ 
- ├── canstants/
- │   └── layers.js
- │   └── loadegionsLayer.js
- │   └── regionsCode.js
- │
- │── hooks/
- │   └── MapContext.js
- │   └── useAuth.js
- │   └── useFacilities.js
- │
- ├── lib/
- │   └── utils.js
- │
- ├── pages/
- │   ├── Auth
- │   ├── NotFound
- │   ├── Dashboard
- │   └── Profile
- │
- ├── utils/
- │   └── supasebase.js
+
+
+  src/
+   ├── components/
+   │   └── dashboard/
+   │       ├── FilterSideBar
+   │       ├── KpiCards
+   │       ├── SearchBar
+   │       ├── StatsCharts
+   │   └── map
+   │       └── controls
+   │           ├── CoordinatesControl
+   │           ├── LayerSwitcherControl
+   │           ├── RotateNorthControl
+   │           └── ZoomControl
+   │       ├── FeatureDetailsDialog
+   │       ├── FeaturePopup
+   │       ├── Map
+   │       ├── MapContentLoader
+   │       ├── MapInteraction
+   │    └── ui
+   │        ├── button
+   │        ├── card
+   │        ├── checkbox
+   │        ├── dropdown-menu
+   │        ├── input
+   │        └── label
+   │   ├── NavBar
+   │   ├── ProtectedRoute
+   │ 
+   ├── canstants/
+   │   └── layers.js
+   │   └── loadegionsLayer.js
+   │   └── regionsCode.js
+   │
+   │── hooks/
+   │   └── MapContext.js
+   │   └── useAuth.js
+   │   └── useFacilities.js
+   │
+   ├── lib/
+   │   └── utils.js
+   │
+   ├── pages/
+   │   ├── Auth
+   │   ├── NotFound
+   │   ├── Dashboard
+   │   └── Profile
+   │
+   ├── utils/
+   │   └── supasebase.js
 
 
 🔎 Data Workflow
