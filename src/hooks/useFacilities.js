@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../../utils/supabase";
+import { supabase } from "../utils/supabase";
 
 // Récupère toutes les facilities avec leur region_id et type
 export default function useFacilities() {
@@ -32,5 +32,5 @@ export default function useFacilities() {
     fetchFacilities();
   }, []);
 
-  return { facilities, loading };
+  return { facilities, setFacilities, loading };
 }

@@ -11,7 +11,7 @@ import { supabase } from "../../utils/supabase";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 
-export default function FilterSidebar({ onApply }) {
+export default function FilterSidebar({ onApply, setFacilities }) {
   const [regions, setRegions] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState("");
   const [equipment, setEquipment] = useState({
@@ -48,8 +48,24 @@ export default function FilterSidebar({ onApply }) {
         .single();
       regionGeom = data?.geom || null;
       regionId = data?.ogc_fid || null;
-    }
 
+      const selectedTypes = Object.keys(equipment).filter(
+        (key) => equipment[key],
+      );
+
+      const { data: facilitiesInRegion, error } = await supabase
+        .from("facilities_geojson")
+        .select("*")
+        .eq("region_id", regionId)
+        .in("type", selectedTypes);
+
+      if (error) {
+        console.error(error);
+      } else {
+        console.log(`Facilities in ${selectedRegion}:`, facilitiesInRegion);
+        setFacilities(facilitiesInRegion || []);
+      }
+    }
 
     onApply({
       region: regionId || null,
@@ -60,9 +76,19 @@ export default function FilterSidebar({ onApply }) {
   };
 
   // Reset all filters to initial state
-  const resetFilters = () => {
+  const resetFilters = async () => {
     setSelectedRegion("");
     setEquipment({ school: true, hospital: true, park: true, hotel: true });
+    const { data: facilitiesInRegion, error } = await supabase
+      .from("facilities_geojson")
+      .select("*")
+
+    if (error) {
+      console.error(error);
+    } else {
+      console.log(`Facilities in ${selectedRegion}:`, facilitiesInRegion);
+      setFacilities(facilitiesInRegion || []);
+    }
     onApply({
       region: null,
       regionName: null,
@@ -88,7 +114,9 @@ export default function FilterSidebar({ onApply }) {
       <div className="space-y-4">
         {/* Administrative Zone Filter */}
         <div>
-          <label className="text-xs sm:text-sm font-semibold text-muted-foreground mb-2 block">Region</label>
+          <label className="text-xs sm:text-sm font-semibold text-muted-foreground mb-2 block">
+            Region
+          </label>
           <select
             className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
             value={selectedRegion}
@@ -116,7 +144,9 @@ export default function FilterSidebar({ onApply }) {
                 onCheckedChange={() => toggleEquip("school")}
               />
               <GraduationCap className="w-4 h-4 text-red-500 shrink-0" />
-              <span className="text-xs sm:text-sm font-medium text-foreground">Schools</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground">
+                Schools
+              </span>
             </label>
             <label className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition">
               <Checkbox
@@ -124,7 +154,9 @@ export default function FilterSidebar({ onApply }) {
                 onCheckedChange={() => toggleEquip("hospital")}
               />
               <Building2 className="w-4 h-4 text-blue-500 shrink-0" />
-              <span className="text-xs sm:text-sm font-medium text-foreground">Hospitals</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground">
+                Hospitals
+              </span>
             </label>
             <label className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition">
               <Checkbox
@@ -132,7 +164,9 @@ export default function FilterSidebar({ onApply }) {
                 onCheckedChange={() => toggleEquip("hotel")}
               />
               <Hotel className="w-4 h-4 text-amber-500 shrink-0" />
-              <span className="text-xs sm:text-sm font-medium text-foreground">Hotels</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground">
+                Hotels
+              </span>
             </label>
             <label className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer transition">
               <Checkbox
@@ -140,7 +174,9 @@ export default function FilterSidebar({ onApply }) {
                 onCheckedChange={() => toggleEquip("park")}
               />
               <TreePine className="w-4 h-4 text-green-500 shrink-0" />
-              <span className="text-xs sm:text-sm font-medium text-foreground">Parks</span>
+              <span className="text-xs sm:text-sm font-medium text-foreground">
+                Parks
+              </span>
             </label>
           </div>
         </div>

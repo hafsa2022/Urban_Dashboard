@@ -12,8 +12,9 @@ import { getRegionColor } from "../../constants/regionsCode";
 import { Style, Icon, Fill, Stroke, Text } from "ol/style";
 import VectorSource from "ol/source/Vector";
 import WKT from "ol/format/WKT";
+import GeoJSON from "ol/format/GeoJSON";
 
-function MapContentLoader({ filters }) {
+function MapContentLoader({ filters, facilities = [] }) {
   const { map } = useContext(MapContext);
   const [layers, setLayers] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -255,6 +256,70 @@ function MapContentLoader({ filters }) {
     }
   }, [filters, layers, map, layerStyles]);
 
+  // Display filtered facilities on map
+  useEffect(() => {
+    if (!map || Object.keys(layers).length === 0 || !facilities || facilities.length === 0) return;
+
+    // Group facilities by type
+    const facilitiesByType = {
+      school: [],
+      hospital: [],
+      park: [],
+      hotel: [],
+    };
+
+    facilities.forEach((facility) => {
+      const type = facility.type;
+      if (facilitiesByType[type]) {
+        facilitiesByType[type].push(facility);
+      }
+    });
+
+    const geoJsonFormat = new GeoJSON({
+      dataProjection: "EPSG:4326",
+      featureProjection: "EPSG:3857",
+    });
+
+    // Update each layer with filtered facilities
+    Object.entries(facilitiesByType).forEach(([type, typeFacilities]) => {
+      if (!layers[type]) return;
+
+      const source = layers[type].getSource();
+      source.clear();
+
+      // Add filtered facilities to the source
+      typeFacilities.forEach((facility) => {
+        // Create feature from facility data
+        let geometry = null;
+        try {
+          if (typeof facility.geom === 'string') {
+            geometry = JSON.parse(facility.geom);
+          } else {
+            geometry = facility.geom;
+          }
+        } catch (e) {
+          console.error(`Failed to parse geometry for facility ${facility.id}:`, e);
+          return;
+        }
+
+        const feature = {
+          type: "Feature",
+          geometry: geometry,
+          properties: {
+            id: facility.id,
+            name: facility.name,
+            type: facility.type,
+            region_id: facility.region_id,
+            ...facility.properties,
+          },
+        };
+
+        const featureObj = geoJsonFormat.readFeature(feature);
+        source.addFeature(featureObj);
+      });
+    });
+  }, [facilities, layers, map]);
+
   // Highlight selected region and zoom
   useEffect(() => {
     if (!map || Object.keys(layers).length === 0) return;
@@ -301,13 +366,33 @@ function MapContentLoader({ filters }) {
     // Zoom to region extent
     if (region && regionGeom) {
       try {
-        const format = new WKT();
-        const feature = format.readFeature(regionGeom, {
-          dataProjection: "EPSG:4326",
-          featureProjection: "EPSG:3857",
-        });
-        const extent = feature.getGeometry().getExtent();
-        map.getView().fit(extent, { padding: [50, 50, 50, 50], duration: 500 });
+        let feature;
+        
+        // Handle both WKT string and GeoJSON object formats
+        if (typeof regionGeom === 'string') {
+          // Assume it's WKT format
+          const format = new WKT();
+          feature = format.readFeature(regionGeom, {
+            dataProjection: "EPSG:4326",
+            featureProjection: "EPSG:3857",
+          });
+        } else {
+          // Assume it's GeoJSON object
+          const geoJsonFormat = new GeoJSON({
+            dataProjection: "EPSG:4326",
+            featureProjection: "EPSG:3857",
+          });
+          feature = geoJsonFormat.readFeature({
+            type: "Feature",
+            geometry: regionGeom,
+            properties: {},
+          });
+        }
+        
+        if (feature && feature.getGeometry()) {
+          const extent = feature.getGeometry().getExtent();
+          map.getView().fit(extent, { padding: [50, 50, 50, 50], duration: 500 });
+        }
       } catch (err) {
         console.warn("Could not zoom to region:", err);
       }

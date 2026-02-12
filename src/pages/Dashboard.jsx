@@ -8,12 +8,16 @@ import { useAuth } from "../hooks/useAuth";
 import KpiCards from "../components/dashboard/KpiCards";
 import FilterSidebar from "../components/dashboard/FilterSidebar";
 import StatsCharts from "../components/dashboard/StatsCharts";
-import useFacilities from "../components/dashboard/useFacilities";
+import useFacilities from "../hooks/useFacilities";
 
 function Dashboard() {
   const { isAuthenticated, loading } = useAuth();
   const [filters, setFilters] = useState({});
-  const { facilities, loading: facilitiesLoading } = useFacilities();
+  const {
+    facilities,
+    setFacilities,
+    loading: facilitiesLoading,
+  } = useFacilities();
 
   if (loading) {
     return (
@@ -36,10 +40,17 @@ function Dashboard() {
         {/* Left column: Filters + Stats Charts - Fixed width on desktop, hidden on mobile */}
         <div className="hidden lg:flex lg:w-80 flex-col overflow-y-auto border-r border-border bg-card">
           <div className="p-4 space-y-2">
-            <FilterSidebar onApply={(f) => setFilters(f)} />
+            <FilterSidebar
+              onApply={(f) => setFilters(f)}
+              setFacilities={(f)=>setFacilities(f)}
+            />
             {!facilitiesLoading && (
               // <div className="border-t border-border pt-4">
-                <StatsCharts facilities={facilities} region={filters.region} equipment={filters.equipment} />
+              <StatsCharts
+                facilities={facilities}
+                region={filters.region}
+                equipment={filters.equipment}
+              />
               // </div>
             )}
           </div>
@@ -52,7 +63,7 @@ function Dashboard() {
           </div>
           <div className="flex-1 overflow-hidden px-3 sm:px-4 pb-3 sm:pb-4">
             <MapComponent center={[-7.0926, 31.7917]} zoom={5}>
-              <MapContentLoader filters={filters} />
+              <MapContentLoader filters={filters} facilities={facilities} />
             </MapComponent>
           </div>
         </div>
@@ -61,7 +72,11 @@ function Dashboard() {
       {/* Mobile: Show Stats at bottom on small screens */}
       <div className="lg:hidden border-t border-border bg-card p-4 max-h-64 overflow-y-auto">
         {!facilitiesLoading && (
-          <StatsCharts facilities={facilities} region={filters.region} equipment={filters.equipment} />
+          <StatsCharts
+            facilities={facilities}
+            region={filters.region}
+            equipment={filters.equipment}
+          />
         )}
       </div>
     </div>
