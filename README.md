@@ -1,4 +1,5 @@
 ![alt text](image.png)
+
 # 🌍 Urban Dashboard
 
 A modern, interactive geographic information system (GIS) application for visualizing and analyzing urban facilities across regions. Built with React, OpenStreetMap, and PostGIS spatial database, Urban Dashboard provides real-time statistics, advanced filtering, and an intuitive interface for exploring urban infrastructure.
