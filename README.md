@@ -55,12 +55,6 @@ cd client
 npm install
 ```
 
-3. **Install server dependencies** (if using backend)
-```bash
-cd ../server
-npm install
-```
-
 4. **Configure environment variables**
 
 Create a `.env` file in the `client` directory:
@@ -198,7 +192,6 @@ facilities_geojson (view/table)
 ├── geom (geometry(Point, 4326))
 ├── region_id (integer) - Foreign key to regions
 ├── properties (jsonb)
-└── area (double precision)
 ```
 
 ### Regions Table
@@ -208,6 +201,7 @@ regions
 ├── nom_region (text) - Region name
 ├── code_region (text)
 ├── geom (geometry(Polygon, 4326))
+├── populations (Double Precision)
 └── [other geographic properties]
 ```
 
