@@ -175,9 +175,8 @@ Urban_Dashboard/
 
 ### Backend & Database
 - **Supabase** - Backend-as-a-Service (Auth + Database)
-- **PostgreSQL** - Relational database
 - **PostGIS** - Spatial database extension
-- **Express.js** - API server (optional)
+
 
 ### Development Tools
 - **ESLint** - Code linting
@@ -315,10 +314,6 @@ Contributions are welcome! Please follow these guidelines:
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the ISC License - see the LICENSE file for details.
 
 ## 👥 Author
 
