@@ -146,18 +146,7 @@ Urban_Dashboard/
 │   │       └── utils.js
 │   ├── package.json
 │   └── vite.config.js
-│
-├── server/                          # Express backend (optional)
-│   ├── routes/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── sql/                         # Database migrations
-│   │   ├── auth.sql
-│   │   ├── add_region_id.sql
-│   │   └── spatial_functions.sql
-│   └── package.json
-│
-└── IMPLEMENTATION_GUIDE.md          # Detailed implementation notes
+
 ```
 
 ## 🛠 Tech Stack
